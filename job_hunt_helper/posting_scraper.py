@@ -41,6 +41,23 @@ class PostingScraper:
 
         return experiences
 
+    def print_data(self):
+        soup = ScrapeHTML.get_html(self.url)
+        job_title = self.get_job_title(soup)
+        location = self.get_location(soup)
+        yoes = self.get_years_experience(soup)
+
+        print(f"==================== title: {job_title} ====================")
+        print(f"role_title: {self.role_title}")
+        print(self.url)
+        print(f"location: {location}")
+        
+        print("experience information:")
+        for exp in yoes:
+            print(f"    - {exp}...")
+            
+        return job_title, location, yoes
+
     def get_data(self):
         soup = ScrapeHTML.get_html(self.url)
         job_title = self.get_job_title(soup)

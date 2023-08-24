@@ -2,32 +2,73 @@ from job_hunt_helper.listings_scraper import ListingsScraper
 from job_hunt_helper.posting_scraper import PostingScraper
 from job_hunt_helper.job_match import JobMatch
 
-# currently only supports when all listings are on one page
-listings = {
-    "kalshi": 'https://kalshi.com/careers',
-    "figma": 'https://www.figma.com/careers/#job-openings',
-    "indigo": 'https://careers.smartrecruiters.com/IndigoBooksMusic',
-    "zoox": 'https://zoox.com/careers/',
-    "oracle": 'https://eeho.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/jobsearch/requisitions?keyword=software&lastSelectedFacet=LOCATIONS&mode=location&selectedFlexFieldsFacets=%22AttributeChar6%7C0+to+2%2B+years%22&selectedLocationsFacet=300000000149325%3B300000000106749',
-    "gauntlet": 'https://jobs.lever.co/gauntlet/',
-    "verkada": 'https://www.verkada.com/careers/#open-positions',
-    "qorvo": 'https://careers.qorvo.com/search/?createNewAlert=false&q=software&optionsFacetsDD_location=&optionsFacetsDD_country=US&optionsFacetsDD_department=&optionsFacetsDD_customfield1=&optionsFacetsDD_customfield2=&optionsFacetsDD_customfield3=',
-    "canonical": 'https://canonical.com/careers/all?search=software',
-    "stackadapt": 'https://jobs.lever.co/stackadapt',
-    "tulip": 'https://tulip.co/careers/'
-}
-
-samples = {
-    "figma": 'https://boards.greenhouse.io/figma/jobs/4214847004',  # greenhouse
-    "zoox": 'https://zoox.com/careers/job-opportunity/?job=c6d78cd2-952d-48c7-9dbb-940126f3037a',
-    "gauntlet": 'https://jobs.lever.co/gauntlet/6bb9569e-d568-4b57-9ca9-d3cd8ac27a52',   # lever
-    "figma2": 'https://boards.greenhouse.io/figma/jobs/4798668004'
-}
+import csv
 
 search_words = ['software', 'engineer']
 exclude_words = ['senior', 'staff', 'principal', 'lead', 'manager', 'intern', 'co-op']
 
-COMPANY_TO_SEARCH = "tulip"
 
-job_matcher = JobMatch("figma", listings['figma'], search_words, exclude_words)
-job_matcher.get_matches()
+print("""
+##############################
+Welcome to job-hunt-helper!
+Get key data for all listings of company or a specific posting.
+Type 'quit' or 'exit' to stop program.
+##############################
+      """)
+
+def get_sorted_keys(unsorted_dict):
+    return sorted(unsorted_dict.keys())
+
+listings = {}
+with open('data/companies.csv', newline='') as csvfile:
+    spamreader = csv.reader(csvfile)
+    for row in spamreader:
+        listings[row[0]] = row[1]
+
+
+while True:
+    get_input = input("all listings or specific posting [l/p]? ")
+
+    if get_input == "quit" or get_input == "exit":
+        break
+    
+    if get_input == "l":
+
+        supported_companies = get_sorted_keys(listings)
+        print("choose company from list, or paste url directly")
+        print("supported companies:")
+        for company in supported_companies:
+            print(f"  - {company}")
+        
+        company_input = input("company or url: ")
+
+        company_name = "unspecified"
+        url = company_input.strip()
+        if company_input.strip() in listings:
+            company_name = company_input.strip()
+            url = listings[company_name]
+
+        print(f"chosen url {url}")
+
+        search_words_input = input("search words (separate by comma): ")
+        exclude_words_input = input("exclude words (separate by comma): ")
+
+        search_words += search_words_input.strip().split(",")
+        exclude_words += exclude_words_input.strip().split(",")
+
+        print(f"search words {search_words}")
+        print(f"exclude words {exclude_words}")
+
+        print(f"\nSearching for listings from {company_input}...\n")
+        job_matcher = JobMatch(company_name, url, search_words, exclude_words)
+        job_matcher.get_matches()
+    
+    if get_input == "p":
+        company_input = input("posting url: ")
+
+        url = company_input.strip()
+        print(f"chosen url {url}")
+        posting_scraper = PostingScraper("unspecified", url)
+        title, location, yoes = posting_scraper.print_data()
+
+print("\njob-hunt-helper has ended")
