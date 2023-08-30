@@ -12,4 +12,6 @@ Can scrape all listings on company career page (link and job title). Can have se
 Can scrape an individual job posting for key data (job title, location, years of experience required). Currently suitable for most postings on greenhouse.io and lever.co.
 
 ## How to use it
-Command line, hope for the best :D
+Command line interface. Run `python3 main.py` and follow prompts given.
+
+Most importantly, hope for the best :D
